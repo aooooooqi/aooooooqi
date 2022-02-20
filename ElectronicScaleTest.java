@@ -9,57 +9,75 @@ public class ElectronicScaleTest {
 	
 	@Test
 	public void testGetWeightLimit() {
-		ElectronicScale trialElectronicScale = new ElectronicScale(70,60);
-		Assert.assertEquals(70,trialElectronicScale.getWeightLimit(),0.5);
+		int weightLimitInGrams = 70;
+		int sensitivity = 60;
+		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
+		Assert.assertEquals(weightLimitInGrams,trialElectronicScale.getWeightLimit(),0.5);
 	}
 	
 	@Test (expected = SimulationException.class)
 	public void testGetZeroWeightLimit() {
-		ElectronicScale trialElectronicScale = new ElectronicScale(0,60);
+		int weightLimitInGrams = 0;
+		int sensitivity = 60;
+		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
 	}
 	
 	@Test (expected = SimulationException.class)
 	public void testGetNegativeWeightLimit() {
-		ElectronicScale trialElectronicScale = new ElectronicScale(-20,60);
+		int weightLimitInGrams = -20;
+		int sensitivity = 60;
+		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
 	}
 	
 	@Test
 	public void testGetSensitivity() {
-		ElectronicScale trialElectronicScale = new ElectronicScale(70,60);
-		Assert.assertEquals(60,trialElectronicScale.getSensitivity(),0.5);
+		int weightLimitInGrams = 70;
+		int sensitivity = 60;
+		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
+		Assert.assertEquals(sensitivity,trialElectronicScale.getSensitivity(),0.5);
 	}
 	
 	@Test (expected = SimulationException.class)
 	public void testGetZeroSensitivity() {
-		ElectronicScale trialElectronicScale = new ElectronicScale(70,0);
+		int weightLimitInGrams = 70;
+		int sensitivity = 0;
+		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
 	}
 	
 	@Test (expected = SimulationException.class)
 	public void testGetNegativeSensitivity() {
-		ElectronicScale trialElectronicScale = new ElectronicScale(70,-30);
+		int weightLimitInGrams = 70;
+		int sensitivity = -30;
+		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
 	}
 	
 	@Test
 	public void testGetCurrentWeight() throws OverloadException{
+		PriceLookupCode pluCodeForItem = new PriceLookupCode("123");
+		PLUCodedItem item1 = new PLUCodedItem(pluCodeForItem, 69.9);
 		ElectronicScale trialElectronicScale = new ElectronicScale(70,60);
 		trialElectronicScale.endConfigurationPhase();
-		double currentWeight = 0;
-		Assert.assertEquals(currentWeight, trialElectronicScale.getCurrentWeight(),1.0);
+		trialElectronicScale.add(item1);
+		Assert.assertEquals(69.9, trialElectronicScale.getCurrentWeight(),1.0);
 	}
 	
 	@Test
-	public void testGetCurrentWeight_CurrentSameAsLimit() throws OverloadException{
+	public void testCurrentWeightSameAsLimitWeight() throws OverloadException{
+		PriceLookupCode pluCodeForItem = new PriceLookupCode("321");
+		PLUCodedItem item1 = new PLUCodedItem(pluCodeForItem, 70);
 		ElectronicScale trialElectronicScale = new ElectronicScale(70,60);
 		trialElectronicScale.endConfigurationPhase();
-		double currentWeight = 70;
-		trialElectronicScale.getCurrentWeight();
+		trialElectronicScale.add(item1);
+		Assert.assertEquals(70,trialElectronicScale.getCurrentWeight(),1.0);
 	}
 	
-	@Test
-	public void testGetCurrentWeight_CurrentLargerThanLimit() throws OverloadException{
+	@Test (expected = OverloadException.class)
+	public void testCurrentWeightLargerThanLimitWeight() throws OverloadException{
+		PriceLookupCode pluCodeForItem = new PriceLookupCode("321");
+		PLUCodedItem item1 = new PLUCodedItem(pluCodeForItem, 80);
 		ElectronicScale trialElectronicScale = new ElectronicScale(70,60);
 		trialElectronicScale.endConfigurationPhase();
-		double currentWeight = 80;
+		trialElectronicScale.add(item1);
 		trialElectronicScale.getCurrentWeight();
 	}
 
@@ -78,17 +96,41 @@ public class ElectronicScaleTest {
 	
 	@Test
 	public void testAdd() {
-		PriceLookupCode pluCodeForApple = new PriceLookupCode("211");
-		PLUCodedItem apple = new PLUCodedItem(pluCodeForApple, 20.5);
-		ElectronicScale trialElectronicScale = new ElectronicScale(7000,600);
+		PriceLookupCode pluCodeForItem = new PriceLookupCode("211");
+		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 20.5);
+		ElectronicScale trialElectronicScale = new ElectronicScale(700,600);
 		trialElectronicScale.endConfigurationPhase();
-		trialElectronicScale.add(apple);
+		trialElectronicScale.add(item);
 		try {
 			Assert.assertEquals(20.5,trialElectronicScale.getCurrentWeight(),1.0);
-		} catch (OverloadException e) {
-			
-		}
-		
+		} catch (OverloadException e) {}
+	}
+	
+	@Test (expected = SimulationException.class)
+	public void testAdd_PhaseError() {
+		PriceLookupCode pluCodeForItem = new PriceLookupCode("213");
+		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 20.5);
+		ElectronicScale trialElectronicScale = new ElectronicScale(700,600);
+		trialElectronicScale.forceErrorPhase();
+		trialElectronicScale.add(item);
+	}
+	
+	@Test (expected = SimulationException.class)
+	public void testAdd_PhaseConfiguration() {
+		PriceLookupCode pluCodeForItem = new PriceLookupCode("231");
+		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 20.5);
+		ElectronicScale trialElectronicScale = new ElectronicScale(700,600);
+		trialElectronicScale.add(item);
+	}
+	
+	@Test (expected = SimulationException.class)
+	public void testDuplicatedAdd() {
+		PriceLookupCode pluCodeForItem = new PriceLookupCode("312");
+		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 20.5);
+		ElectronicScale trialElectronicScale = new ElectronicScale(700,600);
+		trialElectronicScale.endConfigurationPhase();
+		trialElectronicScale.add(item);
+		trialElectronicScale.add(item);
 	}
 	
 	@Test
