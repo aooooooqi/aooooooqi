@@ -1,6 +1,7 @@
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
+//SENG 300 Assignment 3
+//Xinyang Chen (30086738)
+//Qianya Yu (30088479)
+//Aoqi Li (30120288)
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,11 +9,12 @@ import org.junit.Test;
 public class ElectronicScaleTest {
 	
 	@Test
-	public void testGetWeightLimit() {
+	public void testGetWeightLimitAndSensitivity() {
 		int weightLimitInGrams = 70;
 		int sensitivity = 60;
 		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
 		Assert.assertEquals(weightLimitInGrams,trialElectronicScale.getWeightLimit(),0.5);
+		Assert.assertEquals(sensitivity,trialElectronicScale.getSensitivity(),0.5);
 	}
 	
 	@Test (expected = SimulationException.class)
@@ -27,14 +29,6 @@ public class ElectronicScaleTest {
 		int weightLimitInGrams = -20;
 		int sensitivity = 60;
 		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
-	}
-	
-	@Test
-	public void testGetSensitivity() {
-		int weightLimitInGrams = 70;
-		int sensitivity = 60;
-		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
-		Assert.assertEquals(sensitivity,trialElectronicScale.getSensitivity(),0.5);
 	}
 	
 	@Test (expected = SimulationException.class)
@@ -73,7 +67,7 @@ public class ElectronicScaleTest {
 	
 	@Test (expected = OverloadException.class)
 	public void testCurrentWeightLargerThanLimitWeight() throws OverloadException{
-		PriceLookupCode pluCodeForItem = new PriceLookupCode("321");
+		PriceLookupCode pluCodeForItem = new PriceLookupCode("323");
 		PLUCodedItem item1 = new PLUCodedItem(pluCodeForItem, 80);
 		ElectronicScale trialElectronicScale = new ElectronicScale(70,60);
 		trialElectronicScale.endConfigurationPhase();
@@ -135,7 +129,7 @@ public class ElectronicScaleTest {
 	
 	@Test
 	public void testRemove_OneItem() {
-		PriceLookupCode pluCodeForItem = new PriceLookupCode("246");
+		PriceLookupCode pluCodeForItem = new PriceLookupCode("248");
 		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 23.6);
 		ElectronicScale trialElectronicScale = new ElectronicScale(700,600);
 		trialElectronicScale.endConfigurationPhase();
@@ -162,10 +156,36 @@ public class ElectronicScaleTest {
 		} catch (OverloadException e) {}
 	}
 	
+	@Test
+	public void testRemove_LimitWeightSmallerThanItemWeight() {
+		PriceLookupCode pluCodeForItem = new PriceLookupCode("135");
+		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 100.2);
+		ElectronicScale trialElectronicScale = new ElectronicScale(100,600);
+		trialElectronicScale.endConfigurationPhase();
+		trialElectronicScale.add(item);
+		trialElectronicScale.remove(item);
+		try {
+			Assert.assertEquals(0,trialElectronicScale.getCurrentWeight(),1.0);
+		} catch (OverloadException e) {}
+	}
+	
+	@Test
+	public void testRemove_SensitivitySmallerThanDifference() {
+		PriceLookupCode pluCodeForItem = new PriceLookupCode("135");
+		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 100.2);
+		ElectronicScale trialElectronicScale = new ElectronicScale(700,100);
+		trialElectronicScale.endConfigurationPhase();
+		trialElectronicScale.add(item);
+		trialElectronicScale.remove(item);
+		try {
+			Assert.assertEquals(0,trialElectronicScale.getCurrentWeight(),1.0);
+		} catch (OverloadException e) {}
+	}
+	
 	@Test (expected = SimulationException.class)
 	public void testRemove_NoItem() {
 		PriceLookupCode pluCodeForItem = new PriceLookupCode("246");
-		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 23.6);
+		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 123.6);
 		ElectronicScale trialElectronicScale = new ElectronicScale(700,600);
 		trialElectronicScale.endConfigurationPhase();
 		trialElectronicScale.remove(item);
@@ -174,8 +194,10 @@ public class ElectronicScaleTest {
 	@Test (expected = SimulationException.class)
 	public void testRemove_PhaseError() {
 		PriceLookupCode pluCodeForItem = new PriceLookupCode("246");
-		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 23.6);
+		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 35.6);
 		ElectronicScale trialElectronicScale = new ElectronicScale(700,600);
+		trialElectronicScale.endConfigurationPhase();
+		trialElectronicScale.add(item);
 		trialElectronicScale.forceErrorPhase();
 		trialElectronicScale.remove(item);
 	}
@@ -183,10 +205,8 @@ public class ElectronicScaleTest {
 	@Test (expected = SimulationException.class)
 	public void testRemove_PhaseConfiguration() {
 		PriceLookupCode pluCodeForItem = new PriceLookupCode("246");
-		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 23.6);
+		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 123.4);
 		ElectronicScale trialElectronicScale = new ElectronicScale(700,600);
 		trialElectronicScale.remove(item);
-	}
-	
-	
+	}	
 }
