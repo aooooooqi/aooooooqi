@@ -2,19 +2,17 @@
 //Xinyang Chen (30086738)
 //Qianya Yu (30088479)
 //Aoqi Li (30120288)
-
 import org.junit.Assert;
 import org.junit.Test;
 
 public class ElectronicScaleTest {
 	
 	@Test
-	public void testGetWeightLimitAndSensitivity() {
+	public void testGetWeightLimit() {
 		int weightLimitInGrams = 70;
 		int sensitivity = 60;
 		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
 		Assert.assertEquals(weightLimitInGrams,trialElectronicScale.getWeightLimit(),0.5);
-		Assert.assertEquals(sensitivity,trialElectronicScale.getSensitivity(),0.5);
 	}
 	
 	@Test (expected = SimulationException.class)
@@ -29,6 +27,14 @@ public class ElectronicScaleTest {
 		int weightLimitInGrams = -20;
 		int sensitivity = 60;
 		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
+	}
+	
+	@Test
+	public void testGetSensitivity() {
+		int weightLimitInGrams = 70;
+		int sensitivity = 60;
+		ElectronicScale trialElectronicScale = new ElectronicScale(weightLimitInGrams,sensitivity);
+		Assert.assertEquals(sensitivity,trialElectronicScale.getSensitivity(),0.5);
 	}
 	
 	@Test (expected = SimulationException.class)
@@ -208,5 +214,7 @@ public class ElectronicScaleTest {
 		PLUCodedItem item = new PLUCodedItem(pluCodeForItem, 123.4);
 		ElectronicScale trialElectronicScale = new ElectronicScale(700,600);
 		trialElectronicScale.remove(item);
-	}	
+	}
+	
+	
 }
